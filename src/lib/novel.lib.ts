@@ -6,7 +6,7 @@ import uniqid from 'uniqid';
 /**
  * Importing user defined packages.
  */
-import novelModel, { Novel, NovelVolume, NovelStatus } from '../models/novel.model';
+import novelModel, { Novel, NovelStatus } from '../models/novel.model';
 
 /**
  * Importing and defining types.
@@ -14,12 +14,9 @@ import novelModel, { Novel, NovelVolume, NovelStatus } from '../models/novel.mod
 import type { UpdateQuery, FilterQuery } from 'mongoose';
 import type { IModelUpdate } from '../types';
 
-type NovelUpdate = Omit<Partial<Novel>, 'views' | 'createdAt' | 'volumes' | 'nid'>;
+type NovelUpdate = Omit<Partial<Novel>, 'views' | 'createdAt' | 'volumes' | 'nid' | 'chapterCount'>;
 
-interface NovelVolumeUpdate {
-  volume: NovelVolume;
-  operation: 'add' | 'remove';
-}
+type NovelVolumeUpdate = { operation: 'add'; name?: string } | { operation: 'remove'; vid: string };
 
 interface NovelQuery {
   title?: string;
@@ -49,7 +46,7 @@ export async function findNovels<T extends keyof Novel>(novelQuery: NovelQuery, 
   let filterQuery: FilterQuery<Novel> = {};
   const sort = { [novelQuery.sortBy]: novelQuery.sortOrder };
   if (novelQuery.title) filterQuery.title = new RegExp(novelQuery.title, 'i');
-  if (novelQuery.author) filterQuery.author = new RegExp(novelQuery.author, 'i');
+  if (novelQuery.author) filterQuery.author = novelQuery.author;
   if (novelQuery.status) filterQuery.status = novelQuery.status;
   if (novelQuery.genre) filterQuery.genre = novelQuery.genre;
   if (novelQuery.tags) filterQuery.tags = { $all: novelQuery.tags };
@@ -59,8 +56,8 @@ export async function findNovels<T extends keyof Novel>(novelQuery: NovelQuery, 
 export async function updateNovel(nid: string, update: NovelUpdate, incView: boolean = false, volumeUpdate?: NovelVolumeUpdate) {
   let updateQuery: UpdateQuery<Novel> = {};
   if (incView) updateQuery.$inc = { views: 1 };
-  if (volumeUpdate?.operation === 'add') updateQuery.$push = { volumes: volumeUpdate.volume };
-  if (volumeUpdate?.operation === 'remove') updateQuery.$pull = { volumes: { vid: volumeUpdate.volume.vid } };
+  if (volumeUpdate?.operation === 'add') updateQuery.$push = { volumes: { vid: uniqid.process(), name: volumeUpdate.name } };
+  if (volumeUpdate?.operation === 'remove') updateQuery.$pull = { volumes: { vid: volumeUpdate.vid } };
   updateQuery.$set = update;
   const result: IModelUpdate = await novelModel.updateOne({ nid }, updateQuery);
   if (result.n === 0) return 'NOVEL_NOT_FOUND';

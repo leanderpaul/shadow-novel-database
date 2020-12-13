@@ -6,6 +6,7 @@ import uniqid from 'uniqid';
 /**
  * Importing user defined packages.
  */
+import novelModel from '../models/novel.model';
 import chapterModel, { NovelChapter } from '../models/chapter.model';
 
 /**
@@ -26,6 +27,7 @@ interface FindChapterQuery {
 export async function createChapter(newChapter: Omit<NovelChapter, 'cid' | 'index' | 'createdAt'>): Promise<Omit<NovelChapter, '_id'>> {
   const chapterCount = await chapterModel.countDocuments({ nid: newChapter.nid });
   const chapter = await chapterModel.create<Omit<NovelChapter, 'createdAt'>>({ cid: uniqid.process(), index: chapterCount + 1, ...newChapter });
+  await novelModel.updateOne({ nid: newChapter.nid }, { $inc: { chapterCount: 1 } });
   const chapterObj = chapter.toObject();
   delete chapterObj._id;
   return chapterObj;
@@ -45,8 +47,9 @@ export async function updateChapter(cid: string, update: ChapterUpdate) {
   return true;
 }
 
-export async function deleteChapter(cid: string) {
-  const result = await chapterModel.deleteOne({ cid });
+export async function deleteChapter(nid: string, cid: string) {
+  const result = await chapterModel.deleteOne({ cid, nid });
   if (result.n === 0) return 'CHAPTER_NOT_FOUND';
+  await novelModel.updateOne({ nid }, { $inc: { chapterCount: -1 } });
   return true;
 }
