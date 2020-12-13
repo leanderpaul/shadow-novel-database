@@ -31,7 +31,7 @@ interface NovelQuery {
 /**
  * Declaring the constants.
  */
-export async function createNovel(newNovel: Omit<Novel, 'nid' | 'views' | 'createdAt' | 'volumes'>): Promise<Omit<Novel, '_id'>> {
+export async function createNovel(newNovel: Omit<Novel, 'nid' | 'views' | 'createdAt' | 'volumes' | 'chapterCount'>): Promise<Omit<Novel, '_id'>> {
   const novel = await novelModel.create<any>({ nid: uniqid.process(), ...newNovel, volumes: [{ vid: uniqid.process() }] });
   const novelObj = novel.toObject();
   delete novelObj._id;
