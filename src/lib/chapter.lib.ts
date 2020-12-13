@@ -16,12 +16,19 @@ import type { IModelUpdate } from '../types';
 
 type ChapterUpdate = Pick<Partial<NovelChapter>, 'title' | 'content' | 'matureContent'>;
 
-interface FindChapterQuery {
-  nid: string;
-  vid?: string;
+type FindChapterQuery = { nid: string } | { vid: string };
+
+interface FindChapterFilter {
   sortOrder?: 'asc' | 'desc' | 1 | -1;
   offset?: number;
   limit?: number;
+}
+
+interface ChapterPagination<T extends keyof NovelChapter> {
+  limit: number;
+  offset: number;
+  chapters: Pick<NovelChapter, T>[];
+  totalCount: number;
 }
 
 /**
@@ -40,12 +47,14 @@ export async function findById<T extends keyof NovelChapter>(cid: string, projec
   return await chapterModel.findOne({ cid }, projection?.join(' ')).lean();
 }
 
-export async function findChapters<T extends keyof NovelChapter>(query: FindChapterQuery, projection?: T[]): Promise<Pick<NovelChapter, T>[]> {
-  const promise = chapterModel.find(query, projection?.join(' '));
-  if (query.sortOrder) promise.sort({ index: query.sortOrder });
-  if (query.offset) promise.skip(query.offset);
-  if (query.limit) promise.limit(query.limit);
-  return await promise.lean();
+export async function findChapters<T extends keyof NovelChapter>(query: FindChapterQuery, filter: FindChapterFilter, projection?: T[]): Promise<ChapterPagination<T>> {
+  const promise = chapterModel
+    .find(query, projection?.join(' '))
+    .sort({ index: filter.sortOrder || 1 })
+    .skip(filter.offset || 0);
+  if (filter.limit) promise.limit(filter.limit);
+  const [chapters, chapterCount] = await Promise.all([promise.lean(), chapterModel.countDocuments(query)]);
+  return { chapters, limit: filter.limit || chapterCount, offset: filter.offset || 0, totalCount: chapterCount };
 }
 
 export async function updateChapter(cid: string, update: ChapterUpdate) {
