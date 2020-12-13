@@ -1,5 +1,5 @@
 {
-  "name": "shadow-novel-database",
+  "name": "@leanderpaul/shadow-novel-database",
   "version": "0.0.1",
   "description": "The database that is used for shadow-novel application",
   "main": "src/index.ts",
@@ -29,6 +29,9 @@
     "mongoose": "^5.10.9",
     "uniqid": "^5.2.0",
     "winston": "^3.3.3"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
