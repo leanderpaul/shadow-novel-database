@@ -6,6 +6,7 @@ import { Schema, model, Types, Document } from 'mongoose';
 /**
  * Importing user defined packages.
  */
+import { formatContent } from '../utils';
 
 /**
  * Importing and defining types.
@@ -53,12 +54,14 @@ const chapterSchema = new Schema<NovelChapter>(
       type: String,
       required: true,
       minlength: 3,
-      maxlength: 100
+      maxlength: 100,
+      trim: true
     },
     content: {
       type: String,
       required: true,
-      minlength: 3
+      minlength: 3,
+      set: formatContent
     },
     matureContent: {
       type: Boolean,

@@ -6,6 +6,7 @@ import { Schema, model, Types, Document } from 'mongoose';
 /**
  * Importing user defined packages.
  */
+import { formatContent } from '../utils';
 
 /**
  * Importing and defining types.
@@ -67,7 +68,8 @@ const novelSchema = new Schema<Novel>(
       type: String,
       required: true,
       minlength: 3,
-      maxlength: 128
+      maxlength: 128,
+      trim: true
     },
     cover: {
       type: String
@@ -79,7 +81,8 @@ const novelSchema = new Schema<Novel>(
     desc: {
       type: String,
       minlength: 3,
-      maxlength: 1000
+      maxlength: 1000,
+      set: formatContent
     },
     status: {
       type: String,
