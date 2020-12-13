@@ -19,6 +19,9 @@ type ChapterUpdate = Pick<Partial<NovelChapter>, 'title' | 'content' | 'matureCo
 interface FindChapterQuery {
   nid: string;
   vid?: string;
+  sortOrder?: 'asc' | 'desc' | 1 | -1;
+  offset?: number;
+  limit?: number;
 }
 
 /**
@@ -38,7 +41,11 @@ export async function findById<T extends keyof NovelChapter>(cid: string, projec
 }
 
 export async function findChapters<T extends keyof NovelChapter>(query: FindChapterQuery, projection?: T[]): Promise<Pick<NovelChapter, T>[]> {
-  return await chapterModel.find(query, projection?.join(' ')).lean();
+  const promise = chapterModel.find(query, projection?.join(' '));
+  if (query.sortOrder) promise.sort({ index: query.sortOrder });
+  if (query.offset) promise.skip(query.offset);
+  if (query.limit) promise.limit(query.limit);
+  return await promise.lean();
 }
 
 export async function updateChapter(cid: string, update: ChapterUpdate) {
