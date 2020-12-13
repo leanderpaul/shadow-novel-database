@@ -24,8 +24,22 @@ interface NovelQuery {
   status?: NovelStatus;
   genre?: string;
   tags?: string[];
-  sortBy: 'views' | 'title';
-  sortOrder: 'asc' | 'desc';
+}
+
+interface NovelFilter {
+  sort: {
+    field: 'views' | 'title' | 'chapterCount' | 'createdAt';
+    order: 'asc' | 'desc' | 1 | -1;
+  };
+  limit?: number;
+  offset?: number;
+}
+
+interface NovelsPagination<T extends keyof Novel> {
+  offset: number;
+  limit: number;
+  totalCount: number;
+  novels: Pick<Novel, T>[];
 }
 
 /**
@@ -42,15 +56,20 @@ export async function findById<T extends keyof Novel>(nid: string, projection?: 
   return await novelModel.findOne({ nid }, projection?.join(' ')).lean();
 }
 
-export async function findNovels<T extends keyof Novel>(novelQuery: NovelQuery, projection?: T[]): Promise<Pick<Novel, T>[]> {
+export async function findNovels<T extends keyof Novel>(novelQuery: NovelQuery, novelFilter: NovelFilter, projection?: T[]): Promise<NovelsPagination<T>> {
   let filterQuery: FilterQuery<Novel> = {};
-  const sort = { [novelQuery.sortBy]: novelQuery.sortOrder };
   if (novelQuery.title) filterQuery.title = new RegExp(novelQuery.title, 'i');
   if (novelQuery.author) filterQuery.author = novelQuery.author;
   if (novelQuery.status) filterQuery.status = novelQuery.status;
   if (novelQuery.genre) filterQuery.genre = novelQuery.genre;
   if (novelQuery.tags) filterQuery.tags = { $all: novelQuery.tags };
-  return await novelModel.find(filterQuery, projection?.join(' ')).sort(sort).lean();
+  const promise = novelModel
+    .find(filterQuery, projection?.join(' '))
+    .sort(novelFilter.sort)
+    .skip(novelFilter.offset || 0)
+    .limit(novelFilter.limit || 20);
+  const [novels, novelCount] = await Promise.all([promise.lean(), novelModel.countDocuments(filterQuery)]);
+  return { limit: novelFilter.limit || 20, novels, offset: novelFilter.offset || 0, totalCount: novelCount };
 }
 
 export async function updateNovel(nid: string, update: NovelUpdate, incView: boolean = false, volumeUpdate?: NovelVolumeUpdate) {
