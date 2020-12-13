@@ -1,0 +1,39 @@
+{
+  "name": "shadow-novel-database",
+  "version": "0.0.1",
+  "description": "The database that is used for shadow-novel application",
+  "main": "src/index.ts",
+  "private": true,
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build": "tsc",
+    "postbuild": "node scripts/pre-build.js",
+    "pretest": "npm run build",
+    "test": "node test/index",
+    "clean": "rm -r -f dist",
+    "predeploy": "npm run build",
+    "deploy": "cd dist && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leanderpaul/shadow-novel-database.git"
+  },
+  "author": "Shadow Lord",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/leanderpaul/shadow-novel-database/issues"
+  },
+  "homepage": "https://github.com/leanderpaul/shadow-novel-database#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "mongoose": "^5.10.9",
+    "uniqid": "^5.2.0",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/mongoose": "^5.10.2",
+    "@types/uniqid": "^5.2.0",
+    "typescript": "^4.1.3"
+  }
+}
