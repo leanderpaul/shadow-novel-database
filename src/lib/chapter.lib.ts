@@ -14,17 +14,17 @@ import chapterModel, { NovelChapter } from '../models/chapter.model';
  */
 import type { IModelUpdate } from '../types';
 
-type ChapterUpdate = Pick<Partial<NovelChapter>, 'title' | 'content' | 'matureContent'>;
+export type ChapterUpdate = Pick<Partial<NovelChapter>, 'title' | 'content' | 'matureContent'>;
 
-type FindChapterQuery = { nid: string } | { vid: string };
+export type FindChapterQuery = { nid: string } | { vid: string };
 
-interface FindChapterFilter {
-  sortOrder?: 'asc' | 'desc' | 1 | -1;
-  offset?: number;
-  limit?: number;
+export interface FindChapterFilter {
+  sortOrder: 'asc' | 'desc' | 1 | -1;
+  offset: number;
+  limit: number;
 }
 
-interface ChapterPagination<T extends keyof NovelChapter> {
+export interface ChapterPagination<T extends keyof NovelChapter> {
   limit: number;
   offset: number;
   chapters: Pick<NovelChapter, T>[];

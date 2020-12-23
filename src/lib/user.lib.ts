@@ -15,9 +15,9 @@ import userModel, { User } from '../models/user.models';
 import type { UpdateQuery } from 'mongoose';
 import type { IModelUpdate } from '../types';
 
-type UserUpdate = Record<keyof Omit<User, 'library'>, string | undefined>;
+export type UserUpdate = Record<keyof Omit<User, 'library'>, string | undefined>;
 
-interface UserLibraryUpdate {
+export interface UserLibraryUpdate {
   nid: string;
   operation: 'add' | 'remove';
 }

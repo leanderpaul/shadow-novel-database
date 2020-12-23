@@ -14,11 +14,11 @@ import novelModel, { Novel, NovelStatus } from '../models/novel.model';
 import type { UpdateQuery, FilterQuery } from 'mongoose';
 import type { IModelUpdate } from '../types';
 
-type NovelUpdate = Omit<Partial<Novel>, 'views' | 'createdAt' | 'volumes' | 'nid' | 'chapterCount'>;
+export type NovelUpdate = Omit<Partial<Novel>, 'views' | 'createdAt' | 'volumes' | 'nid' | 'chapterCount'>;
 
-type NovelVolumeUpdate = { operation: 'add'; name?: string } | { operation: 'remove'; vid: string };
+export type NovelVolumeUpdate = { operation: 'add'; name?: string } | { operation: 'remove'; vid: string };
 
-interface NovelQuery {
+export interface NovelQuery {
   title?: string;
   author?: string;
   status?: NovelStatus;
@@ -26,16 +26,16 @@ interface NovelQuery {
   tags?: string[];
 }
 
-interface NovelFilter {
+export interface NovelFilter {
   sort: {
     field: 'views' | 'title' | 'chapterCount' | 'createdAt';
     order: 'asc' | 'desc' | 1 | -1;
   };
-  limit?: number;
-  offset?: number;
+  limit: number;
+  offset: number;
 }
 
-interface NovelsPagination<T extends keyof Novel> {
+export interface NovelsPagination<T extends keyof Novel> {
   offset: number;
   limit: number;
   totalCount: number;

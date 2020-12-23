@@ -19,6 +19,10 @@ import { logger } from './logger';
  * Importing and defining types.
  */
 
+import type { UserLibraryUpdate, UserUpdate } from './lib/user.lib';
+import type { NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate, NovelsPagination } from './lib/novel.lib';
+import type { ChapterPagination, ChapterUpdate, FindChapterFilter, FindChapterQuery } from './lib/chapter.lib';
+
 /**
  * Declaring the constants.
  */
@@ -38,5 +42,11 @@ function disconnect() {
  * Exporting the models.
  */
 export default { disconnect, connect };
-export { userModel, novelModel, chapterModel, disconnect, connect };
-export type { User, UserDocument, Novel, NovelDocument, NovelStatus, NovelVolume, NovelChapter, NovelChapterDocument };
+export { userModel, novelModel, chapterModel };
+
+/**
+ * Exporting the types.
+ */
+export type { User, UserDocument, UserLibraryUpdate, UserUpdate };
+export type { Novel, NovelDocument, NovelStatus, NovelVolume, NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate, NovelsPagination };
+export type { NovelChapter, NovelChapterDocument, ChapterPagination, ChapterUpdate, FindChapterFilter, FindChapterQuery };
