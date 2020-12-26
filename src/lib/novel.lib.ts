@@ -35,13 +35,6 @@ export interface NovelFilter {
   offset: number;
 }
 
-export interface NovelsPagination<T extends keyof Novel> {
-  offset: number;
-  limit: number;
-  totalCount: number;
-  novels: Pick<Novel, T>[];
-}
-
 /**
  * Declaring the constants.
  */

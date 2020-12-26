@@ -20,8 +20,8 @@ import { logger } from './logger';
  */
 
 import type { UserLibraryUpdate, UserUpdate } from './lib/user.lib';
-import type { NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate, NovelsPagination } from './lib/novel.lib';
-import type { ChapterPagination, ChapterUpdate, FindChapterFilter, FindChapterQuery } from './lib/chapter.lib';
+import type { NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate } from './lib/novel.lib';
+import type { ChapterUpdate, FindChapterFilter, FindChapterQuery } from './lib/chapter.lib';
 
 /**
  * Declaring the constants.
@@ -48,5 +48,5 @@ export { userModel, novelModel, chapterModel };
  * Exporting the types.
  */
 export type { User, UserDocument, UserLibraryUpdate, UserUpdate };
-export type { Novel, NovelDocument, NovelStatus, NovelVolume, NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate, NovelsPagination };
-export type { NovelChapter, NovelChapterDocument, ChapterPagination, ChapterUpdate, FindChapterFilter, FindChapterQuery };
+export type { Novel, NovelDocument, NovelStatus, NovelVolume, NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate };
+export type { NovelChapter, NovelChapterDocument, ChapterUpdate, FindChapterFilter, FindChapterQuery };
