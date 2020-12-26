@@ -11,7 +11,7 @@ import novelModel, { Novel, NovelStatus } from '../models/novel.model';
 /**
  * Importing and defining types.
  */
-import type { UpdateQuery, FilterQuery } from 'mongoose';
+import type { UpdateQuery } from 'mongoose';
 import type { IModelUpdate } from '../types';
 
 export type NovelUpdate = Omit<Partial<Novel>, 'views' | 'createdAt' | 'volumes' | 'nid' | 'chapterCount'>;
@@ -56,28 +56,25 @@ export async function findById<T extends keyof Novel>(nid: string, projection?: 
   return await novelModel.findOne({ nid }, projection?.join(' ')).lean();
 }
 
-export async function findNovels<T extends keyof Novel>(novelQuery: NovelQuery, novelFilter: NovelFilter, projection?: T[]): Promise<NovelsPagination<T>> {
-  let filterQuery: FilterQuery<Novel> = {};
-  if (novelQuery.title) filterQuery.title = new RegExp(novelQuery.title, 'i');
-  if (novelQuery.author) filterQuery.author = novelQuery.author;
-  if (novelQuery.status) filterQuery.status = novelQuery.status;
-  if (novelQuery.genre) filterQuery.genre = novelQuery.genre;
-  if (novelQuery.tags) filterQuery.tags = { $all: novelQuery.tags };
-  const promise = novelModel
-    .find(filterQuery, projection?.join(' '))
-    .sort(novelFilter.sort)
-    .skip(novelFilter.offset || 0)
-    .limit(novelFilter.limit || 20);
-  const [novels, novelCount] = await Promise.all([promise.lean(), novelModel.countDocuments(filterQuery)]);
-  return { limit: novelFilter.limit || 20, novels, offset: novelFilter.offset || 0, totalCount: novelCount };
+export async function findNovels<T extends keyof Novel>(query: NovelQuery, filter: NovelFilter, projection?: T[]): Promise<Pick<Novel, T>[]> {
+  return await novelModel
+    .find({ ...query, tags: { $all: query.tags } }, projection?.join(' '))
+    .sort(filter.sort)
+    .skip(filter.offset)
+    .limit(filter.limit)
+    .lean();
 }
 
-export async function updateNovel(nid: string, update: NovelUpdate, incView: boolean = false, volumeUpdate?: NovelVolumeUpdate) {
+export async function countNovels(query: NovelQuery) {
+  return await novelModel.countDocuments({ ...query, tags: { $all: query.tags } });
+}
+
+export async function updateNovel(nid: string, update: NovelUpdate | null, incView: boolean = false, volumeUpdate?: NovelVolumeUpdate) {
   let updateQuery: UpdateQuery<Novel> = {};
+  if (update) updateQuery.$set = update;
   if (incView) updateQuery.$inc = { views: 1 };
   if (volumeUpdate?.operation === 'add') updateQuery.$push = { volumes: { vid: uniqid.process(), name: volumeUpdate.name } };
   if (volumeUpdate?.operation === 'remove') updateQuery.$pull = { volumes: { vid: volumeUpdate.vid } };
-  updateQuery.$set = update;
   const result: IModelUpdate = await novelModel.updateOne({ nid }, updateQuery);
   if (result.n === 0) return 'NOVEL_NOT_FOUND';
   return true;

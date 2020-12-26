@@ -24,13 +24,6 @@ export interface FindChapterFilter {
   limit: number;
 }
 
-export interface ChapterPagination<T extends keyof NovelChapter> {
-  limit: number;
-  offset: number;
-  chapters: Pick<NovelChapter, T>[];
-  totalCount: number;
-}
-
 /**
  * Declaring the constants.
  */
@@ -47,14 +40,12 @@ export async function findById<T extends keyof NovelChapter>(cid: string, projec
   return await chapterModel.findOne({ cid }, projection?.join(' ')).lean();
 }
 
-export async function findChapters<T extends keyof NovelChapter>(query: FindChapterQuery, filter: FindChapterFilter, projection?: T[]): Promise<ChapterPagination<T>> {
-  const promise = chapterModel
-    .find(query, projection?.join(' '))
-    .sort({ index: filter.sortOrder || 1 })
-    .skip(filter.offset || 0);
-  if (filter.limit) promise.limit(filter.limit);
-  const [chapters, chapterCount] = await Promise.all([promise.lean(), chapterModel.countDocuments(query)]);
-  return { chapters, limit: filter.limit || chapterCount, offset: filter.offset || 0, totalCount: chapterCount };
+export async function findChapters<T extends keyof NovelChapter>(query: FindChapterQuery, filter: FindChapterFilter, projection?: T[]): Promise<Pick<NovelChapter, T>[]> {
+  return await chapterModel.find(query, projection?.join(' ')).sort({ index: filter.sortOrder }).skip(filter.offset).limit(filter.limit).lean();
+}
+
+export async function countChapters(query: FindChapterFilter) {
+  return await chapterModel.countDocuments(query);
 }
 
 export async function updateChapter(cid: string, update: ChapterUpdate) {
