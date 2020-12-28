@@ -28,8 +28,8 @@ export interface NovelQuery {
 
 export interface NovelFilter {
   sort: {
-    field: 'views' | 'title' | 'chapterCount' | 'createdAt';
-    order: 'asc' | 'desc' | 1 | -1;
+    field: string;
+    order: 'asc' | 'desc';
   };
   limit: number;
   offset: number;

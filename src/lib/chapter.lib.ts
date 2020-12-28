@@ -19,7 +19,7 @@ export type ChapterUpdate = Pick<Partial<NovelChapter>, 'title' | 'content' | 'm
 export type FindChapterQuery = { nid: string } | { vid: string };
 
 export interface FindChapterFilter {
-  sortOrder: 'asc' | 'desc' | 1 | -1;
+  sortOrder: 'asc' | 'desc';
   offset: number;
   limit: number;
 }
