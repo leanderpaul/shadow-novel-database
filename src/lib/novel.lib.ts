@@ -6,7 +6,7 @@ import uniqid from 'uniqid';
 /**
  * Importing user defined packages.
  */
-import novelModel, { Novel, NovelStatus } from '../models/novel.model';
+import novelModel, { Novel } from '../models/novel.model';
 
 /**
  * Importing and defining types.
@@ -21,7 +21,7 @@ export type NovelVolumeUpdate = { operation: 'add'; name?: string } | { operatio
 export interface NovelQuery {
   title?: string;
   author?: string;
-  status?: NovelStatus;
+  status?: string;
   genre?: string;
   tags?: string[];
 }

@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
  * Importing user defined packages.
  */
 import { User, UserDocument } from './models/user.models';
-import { Novel, NovelDocument, NovelStatus, NovelVolume } from './models/novel.model';
+import { Novel, NovelDocument, NovelVolume } from './models/novel.model';
 import { NovelChapter, NovelChapterDocument } from './models/chapter.model';
 
 import * as userModel from './lib/user.lib';
@@ -48,5 +48,5 @@ export { userModel, novelModel, chapterModel };
  * Exporting the types.
  */
 export type { User, UserDocument, UserLibraryUpdate, UserUpdate };
-export type { Novel, NovelDocument, NovelStatus, NovelVolume, NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate };
+export type { Novel, NovelDocument, NovelVolume, NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate };
 export type { NovelChapter, NovelChapterDocument, ChapterUpdate, FindChapterFilter, FindChapterQuery };

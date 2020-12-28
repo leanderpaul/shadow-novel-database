@@ -11,8 +11,6 @@ import { formatContent } from '../utils';
 /**
  * Importing and defining types.
  */
-export type NovelStatus = 'completed' | 'ongoing';
-
 export interface NovelVolume {
   vid: string;
   name?: string;
@@ -24,7 +22,7 @@ export interface Novel {
   title: string;
   author: string;
   desc: string;
-  status: NovelStatus;
+  status: string;
   genre: string;
   tags: string[];
   volumes: NovelVolume[];
