@@ -6,7 +6,7 @@ import uniqid from 'uniqid';
 /**
  * Importing user defined packages.
  */
-import novelModel, { Novel } from '../models/novel.model';
+import novelModel, { Novel, NovelVolume } from '../models/novel.model';
 
 /**
  * Importing and defining types.
@@ -35,6 +35,14 @@ export interface NovelFilter {
   offset: number;
 }
 
+interface PopulatedNovelVolume extends NovelVolume {
+  chapters: string;
+}
+
+interface PopulatedNovel extends Novel {
+  volumes: PopulatedNovelVolume[];
+}
+
 /**
  * Declaring the constants.
  */
@@ -45,7 +53,12 @@ export async function createNovel(newNovel: Omit<Novel, 'nid' | 'views' | 'creat
   return novelObj;
 }
 
-export async function findById<T extends keyof Novel>(nid: string, projection?: T[]): Promise<Pick<Novel, T> | null> {
+export async function findById<T extends keyof Novel>(nid: string, populateVolume: true, projection?: T[]): Promise<Pick<PopulatedNovel, T> | null>;
+export async function findById<T extends keyof Novel>(nid: string, projection?: T[]): Promise<Pick<Novel, T> | null>;
+export async function findById<T extends keyof Novel>(nid: string, populateVolume?: boolean | T[], projection?: T[]): Promise<any> {
+  if (typeof populateVolume === 'boolean' && populateVolume) {
+    return (await novelModel.aggregate())[0] || null;
+  }
   return await novelModel.findOne({ nid }, projection?.join(' ')).lean();
 }
 
