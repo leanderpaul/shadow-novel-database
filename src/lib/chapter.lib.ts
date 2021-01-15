@@ -16,7 +16,10 @@ import type { IModelUpdate } from '../types';
 
 export type ChapterUpdate = Pick<Partial<NovelChapter>, 'title' | 'content' | 'matureContent'>;
 
-export type FindChapterQuery = { nid: string; vid?: string };
+export interface FindChapterQuery {
+  nid: string;
+  cid: string;
+}
 
 export interface FindChapterFilter {
   sortOrder: 'asc' | 'desc';
@@ -36,8 +39,8 @@ export async function createChapter(newChapter: Omit<NovelChapter, 'cid' | 'inde
   return chapterObj;
 }
 
-export async function findById<T extends keyof NovelChapter>(cid: string, projection?: T[]): Promise<Pick<NovelChapter, T> | null> {
-  return await chapterModel.findOne({ cid }, projection?.join(' ')).lean();
+export async function findById<T extends keyof NovelChapter>(query: FindChapterQuery, projection?: T[]): Promise<Pick<NovelChapter, T> | null> {
+  return await chapterModel.findOne(query, projection?.join(' ')).lean();
 }
 
 export async function findChapters<T extends keyof NovelChapter>(query: FindChapterQuery, filter: FindChapterFilter, projection?: T[]): Promise<Pick<NovelChapter, T>[]> {
@@ -46,19 +49,19 @@ export async function findChapters<T extends keyof NovelChapter>(query: FindChap
   return await documentQuery.lean();
 }
 
-export async function countChapters(query: FindChapterQuery) {
-  return await chapterModel.countDocuments(query);
+export async function countChapters(nid: string) {
+  return await chapterModel.countDocuments({ nid });
 }
 
-export async function updateChapter(cid: string, update: ChapterUpdate) {
-  const result: IModelUpdate = await chapterModel.updateOne({ cid }, { $set: update });
+export async function updateChapter(query: FindChapterQuery, update: ChapterUpdate) {
+  const result: IModelUpdate = await chapterModel.updateOne(query, { $set: update });
   if (result.n === 0) return 'CHAPTER_NOT_FOUND';
   return true;
 }
 
-export async function deleteChapter(nid: string, cid: string) {
-  const result = await chapterModel.deleteOne({ cid, nid });
+export async function deleteChapter(query: FindChapterQuery) {
+  const result = await chapterModel.deleteOne(query);
   if (result.n === 0) return 'CHAPTER_NOT_FOUND';
-  await novelModel.updateOne({ nid }, { $inc: { chapterCount: -1 } });
+  await novelModel.updateOne({ nid: query.nid }, { $inc: { chapterCount: -1 } });
   return true;
 }

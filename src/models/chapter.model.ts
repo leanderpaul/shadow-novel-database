@@ -69,7 +69,7 @@ const chapterSchema = new Schema<NovelChapter>(
 /**
  * Setting up the index.
  */
-chapterSchema.index({ cid: 1 }, { name: `<>CID_ALREADY_EXISTS<>`, unique: true });
+chapterSchema.index({ nid: 1, cid: 1 }, { name: `<>CID_ALREADY_EXISTS<>`, unique: true });
 chapterSchema.index({ nid: 1, index: 1 }, { name: '<>CHAPTER_ALREADY_EXISTS<>', unique: true });
 
 /**
