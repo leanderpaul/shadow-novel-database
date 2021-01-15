@@ -21,7 +21,7 @@ export type FindChapterQuery = { nid: string; vid?: string };
 export interface FindChapterFilter {
   sortOrder: 'asc' | 'desc';
   offset: number;
-  limit: number;
+  limit?: number;
 }
 
 /**
@@ -41,7 +41,9 @@ export async function findById<T extends keyof NovelChapter>(cid: string, projec
 }
 
 export async function findChapters<T extends keyof NovelChapter>(query: FindChapterQuery, filter: FindChapterFilter, projection?: T[]): Promise<Pick<NovelChapter, T>[]> {
-  return await chapterModel.find(query, projection?.join(' ')).sort({ index: filter.sortOrder }).skip(filter.offset).limit(filter.limit).lean();
+  const documentQuery = chapterModel.find(query, projection?.join(' ')).sort({ index: filter.sortOrder }).skip(filter.offset);
+  if (filter.limit) documentQuery.limit(filter.limit);
+  return await documentQuery.lean();
 }
 
 export async function countChapters(query: FindChapterFilter) {

@@ -35,6 +35,11 @@ export interface NovelFilter {
   offset: number;
 }
 
+export interface UpdateNovelCondition {
+  nid: string;
+  vid?: string;
+}
+
 /**
  * Declaring the constants.
  */
@@ -62,8 +67,10 @@ export async function countNovels(query: NovelQuery) {
   return await novelModel.countDocuments({ ...query, tags: { $all: query.tags } });
 }
 
-export async function updateNovel(nid: string, updateQuery: UpdateQuery<Omit<Novel, 'nid' | 'author' | 'createdAt' | 'chapterCount'>>) {
-  const result: IModelUpdate = await novelModel.updateOne({ nid }, updateQuery);
+export async function updateNovel(condition: UpdateNovelCondition, updateQuery: UpdateQuery<Omit<Novel, 'nid' | 'author' | 'createdAt' | 'chapterCount'>>) {
+  const { nid, vid } = condition;
+  const filter = vid ? { nid, 'volumes.vid': vid } : { nid };
+  const result: IModelUpdate = await novelModel.updateOne(filter, updateQuery);
   if (result.n === 0) return 'NOVEL_NOT_FOUND';
   return true;
 }
