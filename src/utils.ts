@@ -34,5 +34,5 @@ export function formatContent(str: string) {
 }
 
 export function generateVolume(name?: string | null) {
-  return { vid: uniqid.process(), name };
+  return { vid: uniqid.process(), name, chapterCount: 0 };
 }

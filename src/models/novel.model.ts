@@ -14,6 +14,7 @@ import { formatContent } from '../utils';
 export interface NovelVolume {
   vid: string;
   name?: string;
+  chapterCount: number;
 }
 
 export interface Novel {
@@ -46,6 +47,10 @@ const volumeSchema = new Schema<NovelVolume>(
       type: String,
       minlength: 3,
       maxlength: 32
+    },
+    chapterCount: {
+      type: Number,
+      required: true
     }
   },
   { _id: false }

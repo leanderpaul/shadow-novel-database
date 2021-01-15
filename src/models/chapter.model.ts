@@ -13,7 +13,6 @@ import { formatContent } from '../utils';
  */
 export interface NovelChapter {
   nid: string;
-  vid: string;
   cid: string;
   index: number;
   title: string;
@@ -37,9 +36,6 @@ const chapterSchema = new Schema<NovelChapter>(
     nid: {
       type: String,
       required: true
-    },
-    vid: {
-      type: String
     },
     cid: {
       type: String,
