@@ -43,8 +43,8 @@ export async function findById<T extends keyof NovelChapter>(query: FindChapterQ
   return await chapterModel.findOne(query, projection?.join(' ')).lean();
 }
 
-export async function findChapters<T extends keyof NovelChapter>(query: FindChapterQuery, filter: FindChapterFilter, projection?: T[]): Promise<Pick<NovelChapter, T>[]> {
-  const documentQuery = chapterModel.find(query, projection?.join(' ')).sort({ index: filter.sortOrder }).skip(filter.offset);
+export async function findChapters<T extends keyof NovelChapter>(nid: string, filter: FindChapterFilter, projection?: T[]): Promise<Pick<NovelChapter, T>[]> {
+  const documentQuery = chapterModel.find({ nid }, projection?.join(' ')).sort({ index: filter.sortOrder }).skip(filter.offset);
   if (filter.limit) documentQuery.limit(filter.limit);
   return await documentQuery.lean();
 }
