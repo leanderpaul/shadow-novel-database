@@ -13,6 +13,7 @@ import { NovelChapter, NovelChapterDocument } from './models/chapter.model';
 import * as userModel from './lib/user.lib';
 import * as novelModel from './lib/novel.lib';
 import * as chapterModel from './lib/chapter.lib';
+import * as dbUtils from './utils';
 import { logger } from './logger';
 
 /**
@@ -20,7 +21,7 @@ import { logger } from './logger';
  */
 
 import type { UserLibraryUpdate, UserUpdate } from './lib/user.lib';
-import type { NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate } from './lib/novel.lib';
+import type { NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate, UpdateNovelCondition } from './lib/novel.lib';
 import type { ChapterUpdate, FindChapterFilter, FindChapterQuery } from './lib/chapter.lib';
 
 /**
@@ -42,11 +43,11 @@ function disconnect() {
  * Exporting the models.
  */
 export default { disconnect, connect };
-export { userModel, novelModel, chapterModel };
+export { userModel, novelModel, chapterModel, dbUtils };
 
 /**
  * Exporting the types.
  */
 export type { User, UserDocument, UserLibraryUpdate, UserUpdate };
-export type { Novel, NovelDocument, NovelVolume, NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate };
+export type { Novel, NovelDocument, NovelVolume, NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate, UpdateNovelCondition };
 export type { NovelChapter, NovelChapterDocument, ChapterUpdate, FindChapterFilter, FindChapterQuery };
