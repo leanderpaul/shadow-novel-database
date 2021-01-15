@@ -46,7 +46,7 @@ export async function findChapters<T extends keyof NovelChapter>(query: FindChap
   return await documentQuery.lean();
 }
 
-export async function countChapters(query: FindChapterFilter) {
+export async function countChapters(query: FindChapterQuery) {
   return await chapterModel.countDocuments(query);
 }
 
