@@ -39,8 +39,7 @@ const chapterSchema = new Schema<NovelChapter>(
       required: true
     },
     vid: {
-      type: String,
-      required: true
+      type: String
     },
     cid: {
       type: String,

@@ -6,7 +6,7 @@ import uniqid from 'uniqid';
 /**
  * Importing user defined packages.
  */
-import novelModel, { Novel, NovelVolume } from '../models/novel.model';
+import novelModel, { Novel } from '../models/novel.model';
 
 /**
  * Importing and defining types.
@@ -35,14 +35,6 @@ export interface NovelFilter {
   offset: number;
 }
 
-interface PopulatedNovelVolume extends NovelVolume {
-  chapters: string;
-}
-
-interface PopulatedNovel extends Novel {
-  volumes: PopulatedNovelVolume[];
-}
-
 /**
  * Declaring the constants.
  */
@@ -53,12 +45,7 @@ export async function createNovel(newNovel: Omit<Novel, 'nid' | 'views' | 'creat
   return novelObj;
 }
 
-export async function findById<T extends keyof Novel>(nid: string, populateVolume: true, projection?: T[]): Promise<Pick<PopulatedNovel, T> | null>;
-export async function findById<T extends keyof Novel>(nid: string, projection?: T[]): Promise<Pick<Novel, T> | null>;
-export async function findById<T extends keyof Novel>(nid: string, populateVolume?: boolean | T[], projection?: T[]): Promise<any> {
-  if (typeof populateVolume === 'boolean' && populateVolume) {
-    return (await novelModel.aggregate())[0] || null;
-  }
+export async function findById<T extends keyof Novel>(nid: string, projection?: T[]): Promise<Pick<Novel, T> | null> {
   return await novelModel.findOne({ nid }, projection?.join(' ')).lean();
 }
 
@@ -75,12 +62,7 @@ export async function countNovels(query: NovelQuery) {
   return await novelModel.countDocuments({ ...query, tags: { $all: query.tags } });
 }
 
-export async function updateNovel(nid: string, update: NovelUpdate | null, incView: boolean = false, volumeUpdate?: NovelVolumeUpdate) {
-  let updateQuery: UpdateQuery<Novel> = {};
-  if (update) updateQuery.$set = update;
-  if (incView) updateQuery.$inc = { views: 1 };
-  if (volumeUpdate?.operation === 'add') updateQuery.$push = { volumes: { vid: uniqid.process(), name: volumeUpdate.name } };
-  if (volumeUpdate?.operation === 'remove') updateQuery.$pull = { volumes: { vid: volumeUpdate.vid } };
+export async function updateNovel(nid: string, updateQuery: UpdateQuery<Omit<Novel, 'nid' | 'author' | 'createdAt' | 'chapterCount'>>) {
   const result: IModelUpdate = await novelModel.updateOne({ nid }, updateQuery);
   if (result.n === 0) return 'NOVEL_NOT_FOUND';
   return true;

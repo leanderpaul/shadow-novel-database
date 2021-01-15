@@ -16,7 +16,7 @@ import type { IModelUpdate } from '../types';
 
 export type ChapterUpdate = Pick<Partial<NovelChapter>, 'title' | 'content' | 'matureContent'>;
 
-export type FindChapterQuery = { nid: string } | { vid: string };
+export type FindChapterQuery = { nid: string; vid?: string };
 
 export interface FindChapterFilter {
   sortOrder: 'asc' | 'desc';

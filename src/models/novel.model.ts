@@ -25,7 +25,7 @@ export interface Novel {
   status: string;
   genre: string;
   tags: string[];
-  volumes: NovelVolume[];
+  volumes?: NovelVolume[];
   views: number;
   chapterCount: number;
   createdAt: Date;
@@ -96,8 +96,7 @@ const novelSchema = new Schema<Novel>(
       required: true
     },
     volumes: {
-      type: [volumeSchema],
-      required: true
+      type: [volumeSchema]
     },
     views: {
       type: Number,

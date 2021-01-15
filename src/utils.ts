@@ -2,6 +2,7 @@
  * Importing npm packages.
  */
 import bcrypt from 'bcryptjs';
+import uniqid from 'uniqid';
 
 /**
  * Importing user defined packages.
@@ -30,4 +31,8 @@ export function formatContent(str: string) {
         .replace(/[’]/g, "'")
     )
     .join('\n');
+}
+
+export function generateVolume(name?: string | null) {
+  return { vid: uniqid.process(), name };
 }
