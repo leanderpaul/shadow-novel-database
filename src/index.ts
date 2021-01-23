@@ -21,7 +21,7 @@ import { logger } from './logger';
  */
 
 import type { UserLibraryUpdate, UserUpdate } from './lib/user.lib';
-import type { NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate, UpdateNovelCondition } from './lib/novel.lib';
+import type { NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate, UpdateNovelCondition, NewNovel } from './lib/novel.lib';
 import type { ChapterUpdate, FindChapterFilter, FindChapterQuery } from './lib/chapter.lib';
 
 /**
@@ -49,5 +49,5 @@ export { userModel, novelModel, chapterModel, dbUtils };
  * Exporting the types.
  */
 export type { User, UserDocument, UserLibraryUpdate, UserUpdate };
-export type { Novel, NovelDocument, NovelVolume, NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate, UpdateNovelCondition };
+export type { Novel, NovelDocument, NovelVolume, NovelFilter, NovelQuery, NovelUpdate, NovelVolumeUpdate, UpdateNovelCondition, NewNovel };
 export type { NovelChapter, NovelChapterDocument, ChapterUpdate, FindChapterFilter, FindChapterQuery };

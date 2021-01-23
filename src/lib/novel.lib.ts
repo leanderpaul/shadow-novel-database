@@ -7,6 +7,7 @@ import uniqid from 'uniqid';
  * Importing user defined packages.
  */
 import novelModel, { Novel } from '../models/novel.model';
+import { generateVolume } from '../utils';
 
 /**
  * Importing and defining types.
@@ -40,11 +41,14 @@ export interface UpdateNovelCondition {
   vid?: string;
 }
 
+export type NewNovel = Omit<Novel, 'nid' | 'views' | 'createdAt' | 'volumes' | 'chapterCount'>;
+
 /**
  * Declaring the constants.
  */
-export async function createNovel(newNovel: Omit<Novel, 'nid' | 'views' | 'createdAt' | 'volumes' | 'chapterCount'>): Promise<Omit<Novel, '_id'>> {
-  const novel = await novelModel.create<any>({ nid: uniqid.process(), ...newNovel, volumes: [{ vid: uniqid.process() }] });
+export async function createNovel(newNovel: NewNovel, addVolume: boolean): Promise<Omit<Novel, '_id'>> {
+  const volumes = addVolume ? generateVolume() : null;
+  const novel = await novelModel.create<any>({ nid: uniqid.process(), ...newNovel, volumes });
   const novelObj = novel.toObject();
   delete novelObj._id;
   return novelObj;

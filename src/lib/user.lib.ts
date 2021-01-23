@@ -22,11 +22,13 @@ export interface UserLibraryUpdate {
   operation: 'add' | 'remove';
 }
 
+export type NewUser = Omit<User, 'uid' | '_id' | 'library'>;
+
 /**
  * Declaring the constants.
  */
 
-export async function createUser(newUser: Omit<User, 'uid' | '_id' | 'library'>): Promise<Omit<User, '_id' | 'password'>> {
+export async function createUser(newUser: NewUser): Promise<Omit<User, '_id' | 'password'>> {
   newUser.password = bcrypt.hashSync(newUser.password, 10);
   const library: string[] = [];
   const user = await userModel.create({ uid: uniqid(), ...newUser, library });

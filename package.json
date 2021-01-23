@@ -1,6 +1,6 @@
 {
   "name": "@leanderpaul/shadow-novel-database",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "The database that is used for shadow-novel application",
   "main": "src/index.ts",
   "private": true,

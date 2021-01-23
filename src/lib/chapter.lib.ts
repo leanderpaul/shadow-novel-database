@@ -27,13 +27,14 @@ export interface FindChapterFilter {
   limit?: number;
 }
 
+export type NewChapter = Omit<NovelChapter, 'cid' | 'index' | 'createdAt'>;
+
 /**
  * Declaring the constants.
  */
-export async function createChapter(newChapter: Omit<NovelChapter, 'cid' | 'index' | 'createdAt'>): Promise<Omit<NovelChapter, '_id'>> {
+export async function createChapter(newChapter: NewChapter): Promise<Omit<NovelChapter, '_id'>> {
   const chapterCount = await chapterModel.countDocuments({ nid: newChapter.nid });
   const chapter = await chapterModel.create<Omit<NovelChapter, 'createdAt'>>({ cid: uniqid.process(), index: chapterCount + 1, ...newChapter });
-  await novelModel.updateOne({ nid: newChapter.nid }, { $inc: { chapterCount: 1 } });
   const chapterObj = chapter.toObject();
   delete chapterObj._id;
   return chapterObj;
