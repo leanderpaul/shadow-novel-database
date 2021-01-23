@@ -30,7 +30,7 @@ import type { ChapterUpdate, FindChapterFilter, FindChapterQuery } from './lib/c
 const dbUri = process.env.DB || 'mongodb://localhost/shadow-novel';
 
 function connect() {
-  mongoose.connect(dbUri, { authSource: 'admin', useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
+  mongoose.connect(dbUri, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
   mongoose.connection.on('connected', () => logger.info(`connected to ${dbUri}`));
   mongoose.connection.on('error', (err) => logger.error(err));
 }
