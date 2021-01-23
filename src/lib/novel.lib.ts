@@ -74,8 +74,12 @@ export async function findNovels<T extends keyof Novel>(novelQuery: NovelQuery, 
   return await query.lean();
 }
 
-export async function countNovels(query: NovelQuery) {
-  return await novelModel.countDocuments({ ...query, tags: { $all: query.tags } });
+export async function countNovels(novelQuery: NovelQuery) {
+  const filterQuery = { ...novelQuery };
+  delete filterQuery.tags;
+  const query = novelModel.countDocuments(filterQuery);
+  if (novelQuery.tags) query.where('tags').all(novelQuery.tags);
+  return await query;
 }
 
 export async function updateNovel(condition: UpdateNovelCondition, updateQuery: UpdateQuery<Omit<Novel, 'nid' | 'author' | 'createdAt' | 'chapterCount'>>) {
