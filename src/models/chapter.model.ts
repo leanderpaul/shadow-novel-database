@@ -36,7 +36,7 @@ export interface NovelChapterDocument extends NovelChapter, Document {}
 /**
  * Declaring the constants.
  */
-const chapterSchema = new Schema<NovelChapter>(
+const chapterSchema = new Schema(
   {
     _id: {
       type: Schema.Types.ObjectId,

@@ -35,7 +35,7 @@ export interface UserDocument extends User, Document {}
 /**
  * Declaring the constants.
  */
-const userSchema = new Schema<User>(
+const userSchema = new Schema(
   {
     _id: {
       type: Schema.Types.ObjectId,

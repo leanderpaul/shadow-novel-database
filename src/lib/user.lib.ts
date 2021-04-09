@@ -3,15 +3,18 @@
  */
 import uniqid from 'uniqid';
 import bcrypt from 'bcryptjs';
+import { removeKeys } from '@leanderpaul/ts-utils';
 
 /**
  * Importing user defined packages.
  */
-import userModel, { User } from '../models/user.models';
+import userModel from '../models/user.models';
+import * as utils from '../utils';
 
 /**
  * Importing and defining types.
  */
+import type { User } from '../models/user.models';
 import type { UpdateQuery } from 'mongoose';
 import type { IModelUpdate } from '../types';
 
@@ -30,14 +33,10 @@ export type NewUser = Omit<User, 'uid' | '_id' | 'library'>;
 const logger = getLogger('shadow-novel-database:user');
 
 export async function createUser(newUser: NewUser): Promise<Omit<User, '_id' | 'password'>> {
-  newUser.password = bcrypt.hashSync(newUser.password, 10);
-  const library: string[] = [];
-  const user = await userModel.create({ uid: uniqid(), ...newUser, library });
+  newUser.password = utils.hashPassword(newUser.password);
+  const user = await userModel.create({ uid: utils.generateUUID(), ...newUser });
   logger.debug(`db.users.insert(${user.toJSON()})`);
-  const userObj = user.toObject();
-  delete userObj._id;
-  delete userObj.password;
-  return userObj;
+  return removeKeys(user.toObject(), ['_id', 'password']);
 }
 
 export async function findByUsername<T extends keyof User>(username: string, projection?: T[]): Promise<Pick<User, T> | null> {
@@ -49,7 +48,7 @@ export async function findByUsername<T extends keyof User>(username: string, pro
 
 export async function updateUser(username: string, update: UserUpdate, libraryUpdate?: UserLibraryUpdate) {
   let updateQuery: UpdateQuery<User> = {};
-  if (update.password) update.password = bcrypt.hashSync(update.password, 10);
+  if (update.password) update.password = utils.hashPassword(update.password);
   if (libraryUpdate?.operation === 'add') updateQuery.$push = { library: libraryUpdate.nid };
   if (libraryUpdate?.operation === 'remove') updateQuery.$pull = { library: libraryUpdate.nid };
   updateQuery.$set = update;

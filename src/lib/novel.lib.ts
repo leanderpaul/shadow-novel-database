@@ -6,26 +6,21 @@ import uniqid from 'uniqid';
 /**
  * Importing user defined packages.
  */
-import novelModel, { Novel } from '../models/novel.model';
-import { generateVolume } from '../utils';
+import novelModel from '../models/novel.model';
+import * as utils from '../utils';
 
 /**
  * Importing and defining types.
  */
 import type { UpdateQuery } from 'mongoose';
+import type { Novel } from '../models/novel.model';
 import type { IModelUpdate } from '../types';
 
 export type NovelUpdate = Omit<Partial<Novel>, 'views' | 'createdAt' | 'volumes' | 'nid' | 'chapterCount'>;
 
 export type NovelVolumeUpdate = { operation: 'add'; name?: string } | { operation: 'remove'; vid: string };
 
-export interface NovelQuery {
-  title?: string;
-  author?: string;
-  status?: string;
-  genre?: string;
-  tags?: string[];
-}
+export type NovelQuery = Partial<Pick<Novel, 'title' | 'genre' | 'uid' | 'tags' | 'status'>>;
 
 export interface NovelFilter {
   sort: {
@@ -49,8 +44,8 @@ export type NewNovel = Omit<Novel, 'nid' | 'views' | 'createdAt' | 'volumes' | '
 const logger = getLogger('shadow-novel-database:novel');
 
 export async function createNovel(newNovel: NewNovel, addVolume: boolean): Promise<Omit<Novel, '_id'>> {
-  const volumes = addVolume ? generateVolume() : undefined;
-  const novel = await novelModel.create<any>({ nid: uniqid.process(), ...newNovel, volumes });
+  const volumes = addVolume ? utils.generateVolume() : undefined;
+  const novel = await novelModel.create({ nid: utils.generateUUID(), ...newNovel, volumes });
   const novelObj = novel.toObject();
   logger.debug(`db.novels.insert(${novelObj})`);
   delete novelObj._id;
@@ -68,7 +63,7 @@ export async function findNovels<T extends keyof Novel>(novelQuery: NovelQuery, 
   delete filterQuery.tags;
   const query = novelModel.find(filterQuery, projection?.join(' '));
   if (novelQuery.tags) query.where('tags').all(novelQuery.tags);
-  query.sort({ [filter.sort.field]: filter.sort.order });
+  query.sort({ [filter.sort.field]: filter.sort.order === 'asc' ? 1 : -1 });
   query.skip(filter.offset);
   query.limit(filter.limit);
   logger.debug(`db.novels.find(${query.getFilter()})`);

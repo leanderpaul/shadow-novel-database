@@ -110,7 +110,7 @@ export interface NovelDocument extends Novel, Document {}
 /**
  * Declaring the constants.
  */
-const volumeSchema = new Schema<NovelVolume>(
+const volumeSchema = new Schema(
   {
     vid: {
       type: String,
@@ -128,7 +128,7 @@ const volumeSchema = new Schema<NovelVolume>(
   { _id: false }
 );
 
-const novelSchema = new Schema<Novel>(
+const novelSchema = new Schema<any>(
   {
     _id: {
       type: Schema.Types.ObjectId,

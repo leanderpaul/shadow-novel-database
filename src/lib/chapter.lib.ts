@@ -7,11 +7,13 @@ import uniqid from 'uniqid';
  * Importing user defined packages.
  */
 import novelModel from '../models/novel.model';
-import chapterModel, { NovelChapter } from '../models/chapter.model';
+import chapterModel from '../models/chapter.model';
+import * as utils from '../utils';
 
 /**
  * Importing and defining types.
  */
+import type { NovelChapter } from '../models/chapter.model';
 import type { IModelUpdate } from '../types';
 
 export type ChapterUpdate = Pick<Partial<NovelChapter>, 'title' | 'content' | 'matureContent'>;
@@ -36,7 +38,7 @@ const logger = getLogger('shadow-novel-database:chapter');
 
 export async function createChapter(newChapter: NewChapter): Promise<Omit<NovelChapter, '_id'>> {
   const chapterCount = await chapterModel.countDocuments({ nid: newChapter.nid });
-  const chapter = await chapterModel.create<Omit<NovelChapter, 'createdAt'>>({ cid: uniqid.process(), index: chapterCount + 1, ...newChapter });
+  const chapter = await chapterModel.create({ cid: utils.generateUUID(), index: chapterCount + 1, ...newChapter });
   const chapterObj = chapter.toObject();
   logger.debug(`db.chapters.insert(${chapterObj})`);
   delete chapterObj._id;
