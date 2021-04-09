@@ -6,15 +6,15 @@ import mongoose from 'mongoose';
 /**
  * Importing user defined packages.
  */
-import { User, UserDocument } from './models/user.models';
-import { Novel, NovelDocument, NovelVolume } from './models/novel.model';
-import { NovelChapter, NovelChapterDocument } from './models/chapter.model';
+import { User, UserDocument, UserDBErrors } from './models/user.models';
+import { Novel, NovelDocument, NovelVolume, Genres, NovelDBErrors, NovelStatus, Tags } from './models/novel.model';
+import { NovelChapter, NovelChapterDocument, ChapterDBErrors } from './models/chapter.model';
+import { logger as Logger } from './logger';
 
 import * as userModel from './lib/user.lib';
 import * as novelModel from './lib/novel.lib';
 import * as chapterModel from './lib/chapter.lib';
-import * as dbUtils from './utils';
-import { logger } from './logger';
+import * as DBUtils from './utils';
 
 /**
  * Importing and defining types.
@@ -27,13 +27,12 @@ import type { ChapterUpdate, FindChapterFilter, FindChapterQuery } from './lib/c
 /**
  * Declaring the constants.
  */
-const dbUri = process.env.DB || 'mongodb://localhost/shadow-novel';
+const logger = getLogger('shadow-novel-database');
+const DB_URI = process.env.DB || 'mongodb://localhost/shadow-novel';
 
-function connect() {
-  mongoose.connect(dbUri, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
-  mongoose.connection.on('connected', () => logger.info(`connected to ${dbUri}`));
-  mongoose.connection.on('error', (err) => logger.error(err));
-}
+mongoose.connect(DB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
+mongoose.connection.on('connected', () => logger.info(`connected to database`));
+mongoose.connection.on('error', (err) => logger.error(err));
 
 function disconnect() {
   mongoose.connection.close();
@@ -42,8 +41,9 @@ function disconnect() {
 /**
  * Exporting the models.
  */
-export default { disconnect, connect };
-export { userModel, novelModel, chapterModel, dbUtils };
+export default { disconnect, logger: Logger };
+export { userModel, novelModel, chapterModel, DBUtils };
+export { UserDBErrors, NovelDBErrors, ChapterDBErrors, NovelStatus, Genres, Tags };
 
 /**
  * Exporting the types.

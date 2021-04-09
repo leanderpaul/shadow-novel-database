@@ -8,7 +8,6 @@ import uniqid from 'uniqid';
  */
 import novelModel, { Novel } from '../models/novel.model';
 import { generateVolume } from '../utils';
-import { logQuery, logger } from '../logger';
 
 /**
  * Importing and defining types.
@@ -47,18 +46,20 @@ export type NewNovel = Omit<Novel, 'nid' | 'views' | 'createdAt' | 'volumes' | '
 /**
  * Declaring the constants.
  */
+const logger = getLogger('shadow-novel-database:novel');
+
 export async function createNovel(newNovel: NewNovel, addVolume: boolean): Promise<Omit<Novel, '_id'>> {
-  const volumes = addVolume ? generateVolume() : null;
+  const volumes = addVolume ? generateVolume() : undefined;
   const novel = await novelModel.create<any>({ nid: uniqid.process(), ...newNovel, volumes });
   const novelObj = novel.toObject();
-  logger.info(`db.novels.insert(${novelObj})`);
+  logger.debug(`db.novels.insert(${novelObj})`);
   delete novelObj._id;
   return novelObj;
 }
 
 export async function findById<T extends keyof Novel>(nid: string, projection?: T[]): Promise<Pick<Novel, T> | null> {
   const query = novelModel.findOne({ nid }, projection?.join(' '));
-  logQuery('novels', query);
+  logger.debug(`db.novels.find(${query.getFilter()})`);
   return await query.lean();
 }
 
@@ -70,7 +71,7 @@ export async function findNovels<T extends keyof Novel>(novelQuery: NovelQuery, 
   query.sort({ [filter.sort.field]: filter.sort.order });
   query.skip(filter.offset);
   query.limit(filter.limit);
-  logQuery('novels', query);
+  logger.debug(`db.novels.find(${query.getFilter()})`);
   return await query.lean();
 }
 
@@ -79,6 +80,7 @@ export async function countNovels(novelQuery: NovelQuery) {
   delete filterQuery.tags;
   const query = novelModel.countDocuments(filterQuery);
   if (novelQuery.tags) query.where('tags').all(novelQuery.tags);
+  logger.debug(`db.novels.countDocuments(${query.getFilter()})`);
   return await query;
 }
 
@@ -86,14 +88,14 @@ export async function updateNovel(condition: UpdateNovelCondition, updateQuery: 
   const { nid, vid } = condition;
   const filter = vid ? { nid, 'volumes.vid': vid } : { nid };
   const result: IModelUpdate = await novelModel.updateOne(filter, updateQuery);
-  logger.info(`db.novels.updateOne(${filter}, ${updateQuery})`);
+  logger.debug(`db.novels.updateOne(${filter}, ${updateQuery})`);
   if (result.n === 0) return 'NOVEL_NOT_FOUND';
   return true;
 }
 
 export async function deleteNovel(nid: string) {
   const result = await novelModel.deleteOne({ nid });
-  logger.info(`db.novels.deleteOne(${{ nid }})`);
+  logger.debug(`db.novels.deleteOne(${{ nid }})`);
   if (result.n === 0) return 'NOVEL_NOT_FOUND';
   return true;
 }

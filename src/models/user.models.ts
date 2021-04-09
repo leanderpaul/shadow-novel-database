@@ -1,7 +1,7 @@
 /**
  * Importing npm packages.
  */
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
 /**
  * Importing user defined packages.
@@ -10,6 +10,17 @@ import { Schema, model, Types, Document } from 'mongoose';
 /**
  * Importing and defining types.
  */
+export enum UserDBErrors {
+  UID_REQUIRED = 'UID_REQUIRED',
+  USERNAME_REQUIRED = 'USERNAME_REQUIRED',
+  USERNAME_INVALID = 'USERNAME_INVALID',
+  FIRST_NAME_INVALID = 'FIRST_NAME_INVALID',
+  LAST_NAME_INVALID = 'LAST_NAME_INVALID',
+  PASSWORD_REQUIRED = 'PASSWORD_REQUIRED',
+  PASSWORD_INVALID = 'PASSWORD_INVALID',
+  USERNAME_ALREADY_EXISTS = 'USERNAME_ALREADY_EXISTS'
+}
+
 export interface User {
   uid: string;
   username: string;
@@ -27,33 +38,33 @@ export interface UserDocument extends User, Document {}
 const userSchema = new Schema<User>(
   {
     _id: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
       auto: true,
       select: false
     },
     uid: {
       type: String,
-      required: true
+      required: UserDBErrors.UID_REQUIRED
     },
     username: {
       type: String,
-      required: true
+      validate: [/^[a-zA-Z0-9-_@]{3,32}$/, UserDBErrors.USERNAME_INVALID],
+      required: UserDBErrors.USERNAME_REQUIRED
     },
     firstName: {
       type: String,
-      minlength: 3,
-      maxlength: 32,
+      validate: [/^([a-zA-Z\ ]){3,32}$/, UserDBErrors.FIRST_NAME_INVALID],
       trim: true
     },
     lastName: {
       type: String,
-      minlength: 3,
-      maxlength: 32,
+      validate: [/^([a-zA-Z\ ]){3,32}$/, UserDBErrors.LAST_NAME_INVALID],
       trim: true
     },
     password: {
       type: String,
-      required: true
+      validate: [/^[a-zA-Z0-9@-_#$]{8,32}$/, UserDBErrors.PASSWORD_INVALID],
+      required: UserDBErrors.PASSWORD_REQUIRED
     },
     library: {
       type: [String],
@@ -61,8 +72,8 @@ const userSchema = new Schema<User>(
     }
   },
   {
-    _id: false,
-    versionKey: false
+    versionKey: false,
+    timestamps: { updatedAt: false }
   }
 );
 

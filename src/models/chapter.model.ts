@@ -1,7 +1,7 @@
 /**
  * Importing npm packages.
  */
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
 /**
  * Importing user defined packages.
@@ -11,6 +11,16 @@ import { formatContent } from '../utils';
 /**
  * Importing and defining types.
  */
+export enum ChapterDBErrors {
+  NID_REQUIRED = 'NID_REQUIRED',
+  CID_REQUIRED = 'CID_REQUIRED',
+  CHAPTER_INDEX_REQUIRED = 'CHAPTER_INDEX_REQUIRED',
+  CHAPTER_TITLE_REQUIRED = 'CHAPTER_TITLE_REQUIRED',
+  CHAPTER_TITLE_INVALID = 'CHAPTER_TITLE_INVALID',
+  CHAPTER_CONTENT_REQUIRED = 'CHAPTER_CONTENT_REQUIRED',
+  CHAPTER_CONTENT_INVALID = 'CHAPTER_CONTENT_INVALID'
+}
+
 export interface NovelChapter {
   nid: string;
   cid: string;
@@ -29,33 +39,32 @@ export interface NovelChapterDocument extends NovelChapter, Document {}
 const chapterSchema = new Schema<NovelChapter>(
   {
     _id: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
       auto: true,
       select: false
     },
     nid: {
       type: String,
-      required: true
+      required: ChapterDBErrors.NID_REQUIRED
     },
     cid: {
       type: String,
-      required: true
+      required: ChapterDBErrors.CID_REQUIRED
     },
     index: {
       type: Number,
-      required: true
+      required: ChapterDBErrors.CHAPTER_INDEX_REQUIRED
     },
     title: {
       type: String,
-      required: true,
-      minlength: 3,
-      maxlength: 100,
+      required: ChapterDBErrors.CHAPTER_TITLE_REQUIRED,
+      validate: [/^[\w\d\ @#$&\-_'"]{3,64}$/, ChapterDBErrors.CHAPTER_TITLE_INVALID],
       trim: true
     },
     content: {
       type: String,
       required: true,
-      minlength: 3,
+      validate: [/^[\w\d\ @#$&\-_'"]{3,}$/, ChapterDBErrors.CHAPTER_TITLE_INVALID],
       set: formatContent
     },
     matureContent: {
@@ -63,7 +72,11 @@ const chapterSchema = new Schema<NovelChapter>(
       default: false
     }
   },
-  { timestamps: true }
+  {
+    timestamps: { updatedAt: false },
+    versionKey: false,
+    _id: false
+  }
 );
 
 /**

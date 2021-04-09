@@ -8,7 +8,6 @@ import bcrypt from 'bcryptjs';
  * Importing user defined packages.
  */
 import userModel, { User } from '../models/user.models';
-import { logQuery, logger } from '../logger';
 
 /**
  * Importing and defining types.
@@ -28,12 +27,13 @@ export type NewUser = Omit<User, 'uid' | '_id' | 'library'>;
 /**
  * Declaring the constants.
  */
+const logger = getLogger('shadow-novel-database:user');
 
 export async function createUser(newUser: NewUser): Promise<Omit<User, '_id' | 'password'>> {
   newUser.password = bcrypt.hashSync(newUser.password, 10);
   const library: string[] = [];
   const user = await userModel.create({ uid: uniqid(), ...newUser, library });
-  logger.info(`db.users.insert(${user.toJSON()})`);
+  logger.debug(`db.users.insert(${user.toJSON()})`);
   const userObj = user.toObject();
   delete userObj._id;
   delete userObj.password;
@@ -42,7 +42,7 @@ export async function createUser(newUser: NewUser): Promise<Omit<User, '_id' | '
 
 export async function findByUsername<T extends keyof User>(username: string, projection?: T[]): Promise<Pick<User, T> | null> {
   const query = userModel.findOne({ username }, projection?.join(' '));
-  logQuery('users', query);
+  logger.debug(`db.users.find(${query.getFilter()})`);
   const user = await query.lean();
   return user;
 }
@@ -54,7 +54,7 @@ export async function updateUser(username: string, update: UserUpdate, libraryUp
   if (libraryUpdate?.operation === 'remove') updateQuery.$pull = { library: libraryUpdate.nid };
   updateQuery.$set = update;
   const result: IModelUpdate = await userModel.updateOne({ username }, updateQuery);
-  logger.info(`db.users.updateOne(${{ username }}, ${updateQuery})`);
+  logger.debug(`db.users.updateOne(${{ username }}, ${updateQuery})`);
   if (result.n === 0) return 'USER_NOT_FOUND';
   return true;
 }
