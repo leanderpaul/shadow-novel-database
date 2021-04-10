@@ -29,12 +29,9 @@ const consoleFormat = printf(({ level, message, timestamp, service }) => `${time
 const consoleColor = colorize({ level: true, colors: { info: 'green', error: 'bold red', warn: 'italic yellow', debug: 'magenta', http: 'blue' } });
 const fileLlogFormat = combine(timestamp({ format: 'DD-MM-YY HH:mm:ss:SS' }), errors({ stack: true }), json());
 const consoleLogFormat = combine(timestamp({ format: 'HH:mm:ss:SS' }), errors({ stack: true }), consoleColor, consoleFormat);
-const fileTransport = new winston.transports.DailyRotateFile({ filename, datePattern: 'YY-MM-DD_kk-mm-ss', format: fileLlogFormat, maxSize: '100m' });
+const fileTransport = new winston.transports.DailyRotateFile({ filename, datePattern: 'YY-MM-DD_kk-mm-ss', format: fileLlogFormat, maxSize: '100m', frequency: '24h' });
 
-const logger = winston.createLogger({
-  level: logLevel,
-  transports: [fileTransport]
-});
+const logger = winston.createLogger({ level: logLevel, transports: [fileTransport] });
 
 if (process.env.NODE_ENV != 'production') logger.add(new winston.transports.Console({ format: consoleLogFormat }));
 

@@ -18,7 +18,8 @@ export enum UserDBErrors {
   LAST_NAME_INVALID = 'LAST_NAME_INVALID',
   PASSWORD_REQUIRED = 'PASSWORD_REQUIRED',
   PASSWORD_INVALID = 'PASSWORD_INVALID',
-  USERNAME_ALREADY_EXISTS = 'USERNAME_ALREADY_EXISTS'
+  USERNAME_ALREADY_EXISTS = 'USERNAME_ALREADY_EXISTS',
+  PASSWORD_NOT_HASHED = 'PASSWORD_NOT_HASHED'
 }
 
 export interface User {
@@ -63,7 +64,7 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      validate: [/^[a-zA-Z0-9@-_#$]{8,32}$/, UserDBErrors.PASSWORD_INVALID],
+      validate: [/^[^]{60}$/, UserDBErrors.PASSWORD_NOT_HASHED],
       required: UserDBErrors.PASSWORD_REQUIRED
     },
     library: {
@@ -86,4 +87,6 @@ userSchema.index({ uid: 1 }, { name: '<>USER_UID<>', unique: true });
 /**
  * Exporting the user model.
  */
-export default model<UserDocument>('users', userSchema);
+const userModel = model<UserDocument>('users', userSchema);
+export default userModel;
+export { userModel };

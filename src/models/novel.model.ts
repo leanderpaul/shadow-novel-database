@@ -6,7 +6,6 @@ import { Schema, model, Document } from 'mongoose';
 /**
  * Importing user defined packages.
  */
-import { formatContent } from '../utils';
 
 /**
  * Importing and defining types.
@@ -17,7 +16,8 @@ export enum NovelDBErrors {
   NOVEL_TITLE_INVALID = 'NOVEL_TITLE_INVALID',
   UID_REQUIRED = 'AUTHOR_REQUIRED',
   DESC_REQUIRED = 'DESC_REQUIRED',
-  DESC_INVALID = 'DESC_INVALID',
+  DESC_TEXT_REQUIRED = 'DESC_TEXT_REQUIRED',
+  DESC_TAG_INVALID = 'DESC_TAG_INVALID',
   STATUS_REQUIRED = 'STATUS_REQUIRED',
   STATUS_INVALID = 'STATUS_INVALID',
   GENRE_REQUIRED = 'GENRE_REQUIRED',
@@ -84,6 +84,11 @@ export enum Tags {
   YURI = 'YURI'
 }
 
+export interface NovelDesc {
+  tag: 'p' | 'strong';
+  text: string;
+}
+
 export interface NovelVolume {
   vid: string;
   name?: string;
@@ -95,7 +100,7 @@ export interface Novel {
   cover?: string;
   title: string;
   uid: string;
-  desc: string;
+  desc: NovelDesc[];
   status: NovelStatus;
   genre: Genres;
   tags: Tags[];
@@ -110,6 +115,24 @@ export interface NovelDocument extends Novel, Document {}
 /**
  * Declaring the constants.
  */
+const descSchema = new Schema(
+  {
+    tag: {
+      type: String,
+      enum: {
+        values: ['p', 'strong'],
+        message: NovelDBErrors.DESC_TAG_INVALID
+      },
+      default: 'p'
+    },
+    text: {
+      type: String,
+      required: NovelDBErrors.DESC_TEXT_REQUIRED
+    }
+  },
+  { _id: false }
+);
+
 const volumeSchema = new Schema(
   {
     vid: {
@@ -128,7 +151,7 @@ const volumeSchema = new Schema(
   { _id: false }
 );
 
-const novelSchema = new Schema<any>(
+const novelSchema = new Schema(
   {
     _id: {
       type: Schema.Types.ObjectId,
@@ -142,7 +165,7 @@ const novelSchema = new Schema<any>(
     title: {
       type: String,
       required: NovelDBErrors.NOVEL_TITLE_REQUIRED,
-      validate: [/^([a-zA-Z\ ]){3,128}$/, NovelDBErrors.NOVEL_TITLE_INVALID],
+      validate: [/^[^]{3,128}$/, NovelDBErrors.NOVEL_TITLE_INVALID],
       trim: true
     },
     cover: {
@@ -153,25 +176,32 @@ const novelSchema = new Schema<any>(
       required: NovelDBErrors.UID_REQUIRED
     },
     desc: {
-      type: String,
-      required: NovelDBErrors.DESC_REQUIRED,
-      validate: [/^([a-zA-Z\ ]){3,5000}$/, NovelDBErrors.DESC_INVALID],
-      set: formatContent
+      type: [descSchema],
+      required: NovelDBErrors.DESC_REQUIRED
     },
     status: {
       type: String,
-      enum: Object.keys(NovelStatus),
-      required: NovelDBErrors.STATUS_REQUIRED
+      required: NovelDBErrors.STATUS_REQUIRED,
+      enum: {
+        values: Object.keys(NovelStatus),
+        message: NovelDBErrors.STATUS_INVALID
+      }
     },
     genre: {
       type: String,
       required: NovelDBErrors.GENRE_REQUIRED,
-      enum: Object.keys(Genres)
+      enum: {
+        values: Object.keys(Genres),
+        message: NovelDBErrors.GENRE_INVALID
+      }
     },
     tags: {
       type: [String],
       required: NovelDBErrors.TAGS_REQUIRED,
-      enum: Object.keys(Tags)
+      enum: {
+        values: Object.keys(Tags),
+        message: NovelDBErrors.TAGS_INVALID
+      }
     },
     volumes: {
       type: [volumeSchema]
@@ -201,4 +231,6 @@ novelSchema.index({ uid: 1, nid: 1 }, { name: `<>UID_NID_COMPOUND_INDEX<>`, uniq
 /**
  * Exporting the novel model.
  */
-export default model<NovelDocument>('novels', novelSchema);
+const novelModel = model<NovelDocument>('novels', novelSchema);
+export default novelModel;
+export { novelModel };

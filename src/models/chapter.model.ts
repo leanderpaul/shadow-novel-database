@@ -6,7 +6,6 @@ import { Schema, model, Document } from 'mongoose';
 /**
  * Importing user defined packages.
  */
-import { formatContent } from '../utils';
 
 /**
  * Importing and defining types.
@@ -18,15 +17,22 @@ export enum ChapterDBErrors {
   CHAPTER_TITLE_REQUIRED = 'CHAPTER_TITLE_REQUIRED',
   CHAPTER_TITLE_INVALID = 'CHAPTER_TITLE_INVALID',
   CHAPTER_CONTENT_REQUIRED = 'CHAPTER_CONTENT_REQUIRED',
-  CHAPTER_CONTENT_INVALID = 'CHAPTER_CONTENT_INVALID'
+  CHAPTER_CONTENT_TEXT_REQUIRED = 'CHAPTER_CONTENT_TEXT_REQUIRED',
+  CHAPTER_CONTENT_TAG_INVALID = 'CHAPTER_CONTENT_TAG_INVALID'
+}
+
+export interface ChapterContent {
+  tag: 'p' | 'strong';
+  text: string;
 }
 
 export interface NovelChapter {
   nid: string;
+  vid?: string;
   cid: string;
   index: number;
   title: string;
-  content: string;
+  content: ChapterContent[];
   matureContent: boolean;
   createdAt: string;
 }
@@ -36,6 +42,24 @@ export interface NovelChapterDocument extends NovelChapter, Document {}
 /**
  * Declaring the constants.
  */
+const contentSchema = new Schema(
+  {
+    tag: {
+      type: String,
+      enum: {
+        values: ['p', 'strong'],
+        message: ChapterDBErrors.CHAPTER_CONTENT_TAG_INVALID
+      },
+      default: 'p'
+    },
+    text: {
+      type: String,
+      required: ChapterDBErrors.CHAPTER_CONTENT_TEXT_REQUIRED
+    }
+  },
+  { _id: false }
+);
+
 const chapterSchema = new Schema(
   {
     _id: {
@@ -46,6 +70,9 @@ const chapterSchema = new Schema(
     nid: {
       type: String,
       required: ChapterDBErrors.NID_REQUIRED
+    },
+    vid: {
+      type: String
     },
     cid: {
       type: String,
@@ -58,14 +85,12 @@ const chapterSchema = new Schema(
     title: {
       type: String,
       required: ChapterDBErrors.CHAPTER_TITLE_REQUIRED,
-      validate: [/^[\w\d\ @#$&\-_'"]{3,64}$/, ChapterDBErrors.CHAPTER_TITLE_INVALID],
+      validate: [/^[^]{3,64}$/, ChapterDBErrors.CHAPTER_TITLE_INVALID],
       trim: true
     },
     content: {
-      type: String,
-      required: true,
-      validate: [/^[\w\d\ @#$&\-_'"]{3,}$/, ChapterDBErrors.CHAPTER_TITLE_INVALID],
-      set: formatContent
+      type: [contentSchema],
+      required: ChapterDBErrors.CHAPTER_CONTENT_REQUIRED
     },
     matureContent: {
       type: Boolean,
@@ -88,4 +113,6 @@ chapterSchema.index({ nid: 1, index: 1 }, { name: '<>CHAPTER_ALREADY_EXISTS<>', 
 /**
  * Exporting the novel model.
  */
-export default model<NovelChapterDocument>('chapters', chapterSchema);
+const chapterModel = model<NovelChapterDocument>('chapters', chapterSchema);
+export default chapterModel;
+export { chapterModel };
