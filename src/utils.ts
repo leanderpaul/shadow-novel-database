@@ -13,14 +13,8 @@ import { UserDBErrors } from './models/user.models';
 /**
  * Importing and defining types.
  */
-import type { NovelDesc, Novel } from './models/novel.model';
-
-interface EditorJSBlock {
-  type: string;
-  data: {
-    text: string;
-  };
-}
+import type { Novel } from './models/novel.model';
+import type { EditorContent } from './types';
 
 /**
  * Declaring the constants.
@@ -98,31 +92,14 @@ export function decrypt(iv: string, encryptedStr: string) {
 }
 
 /**
- * Convert Editor.js output to novel description schema.
- */
-export function convertEditorTags(blocks: EditorJSBlock[]) {
-  const output: NovelDesc[] = [];
-  for (let index = 0; index < blocks.length; index++) {
-    const block = blocks[index];
-    output.push({ tag: block.type === 'paragraph' ? 'p' : 'strong', text: block.data.text });
-  }
-  return output;
-}
-
-/**
  * Removes and replaces unneccessary and other characters.
  */
 export function formatText(str: string) {
   return str
-    .split('\n')
-    .filter((para) => para.trim())
-    .map((para) =>
-      para
-        .replace(/[\t\r]/g, '')
-        .replace(/[“”]/g, '"')
-        .replace(/[’]/g, "'")
-    )
-    .join(' ');
+    .trim()
+    .replace(/[\t\r]/g, '')
+    .replace(/[“”]/g, '"')
+    .replace(/[’]/g, "'");
 }
 
 /**
@@ -137,4 +114,9 @@ export function generateVolume(name?: string | null) {
  */
 export function findNovelType(novel: Pick<Novel, 'volumes'>) {
   return novel.volumes ? 'book' : 'series';
+}
+
+export function isMatureContent(content: EditorContent[]) {
+  const text = content.map((para) => para.text).join(' ');
+  return /(clitoris|dick|orgasm|pussy|penis|nsfw)/gim.test(text);
 }

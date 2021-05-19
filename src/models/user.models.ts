@@ -19,7 +19,8 @@ export enum UserDBErrors {
   PASSWORD_REQUIRED = 'PASSWORD_REQUIRED',
   PASSWORD_INVALID = 'PASSWORD_INVALID',
   USERNAME_ALREADY_EXISTS = 'USERNAME_ALREADY_EXISTS',
-  PASSWORD_NOT_HASHED = 'PASSWORD_NOT_HASHED'
+  PASSWORD_NOT_HASHED = 'PASSWORD_NOT_HASHED',
+  WEBNOVEL_COOKIE_INVALID = 'WEBNOVEL_COOKIE_INVALID'
 }
 
 export interface User {
@@ -29,6 +30,7 @@ export interface User {
   lastName?: string;
   password: string;
   library: string[];
+  webnovelCookie?: string;
 }
 
 export interface UserDocument extends User, Document {}
@@ -45,12 +47,14 @@ const userSchema = new Schema(
     },
     uid: {
       type: String,
-      required: UserDBErrors.UID_REQUIRED
+      required: UserDBErrors.UID_REQUIRED,
+      immitable: true
     },
     username: {
       type: String,
       validate: [/^[a-zA-Z0-9-_@]{3,32}$/, UserDBErrors.USERNAME_INVALID],
-      required: UserDBErrors.USERNAME_REQUIRED
+      required: UserDBErrors.USERNAME_REQUIRED,
+      immitable: true
     },
     firstName: {
       type: String,
@@ -70,6 +74,10 @@ const userSchema = new Schema(
     library: {
       type: [String],
       required: true
+    },
+    webnovelCookie: {
+      type: String,
+      validate: [/_csrfToken=/, UserDBErrors.WEBNOVEL_COOKIE_INVALID]
     }
   },
   {

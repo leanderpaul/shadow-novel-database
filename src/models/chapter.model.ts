@@ -10,6 +10,8 @@ import { Schema, model, Document } from 'mongoose';
 /**
  * Importing and defining types.
  */
+import type { EditorContent } from '../types';
+
 export enum ChapterDBErrors {
   NID_REQUIRED = 'NID_REQUIRED',
   CID_REQUIRED = 'CID_REQUIRED',
@@ -21,18 +23,13 @@ export enum ChapterDBErrors {
   CHAPTER_CONTENT_TAG_INVALID = 'CHAPTER_CONTENT_TAG_INVALID'
 }
 
-export interface ChapterContent {
-  tag: 'p' | 'strong';
-  text: string;
-}
-
 export interface NovelChapter {
   nid: string;
   vid?: string;
   cid: string;
   index: number;
   title: string;
-  content: ChapterContent[];
+  content: EditorContent[];
   matureContent: boolean;
   createdAt: string;
 }
@@ -69,14 +66,17 @@ const chapterSchema = new Schema(
     },
     nid: {
       type: String,
-      required: ChapterDBErrors.NID_REQUIRED
+      required: ChapterDBErrors.NID_REQUIRED,
+      immitable: true
     },
     vid: {
-      type: String
+      type: String,
+      immitable: true
     },
     cid: {
       type: String,
-      required: ChapterDBErrors.CID_REQUIRED
+      required: ChapterDBErrors.CID_REQUIRED,
+      immitable: true
     },
     index: {
       type: Number,

@@ -10,6 +10,8 @@ import { Schema, model, Document } from 'mongoose';
 /**
  * Importing and defining types.
  */
+import type { EditorContent } from '../types';
+
 export enum NovelDBErrors {
   NID_REQUIRED = 'NID_REQUIRED',
   NOVEL_TITLE_REQUIRED = 'NOVEL_TITLE_REQUIRED',
@@ -26,7 +28,10 @@ export enum NovelDBErrors {
   TAGS_INVALID = 'TAGS_INVALID',
   VID_REQUIRED = 'VID_REQUIRED',
   VOLUME_NAME_INVALID = 'VAOLUME_NAME_INVALID',
-  VOLUME_CHAPTER_COUNT_REQUIRED = 'VOLUME_CHAPTER_COUNT_REQUIRED'
+  VOLUME_CHAPTER_COUNT_REQUIRED = 'VOLUME_CHAPTER_COUNT_REQUIRED',
+  WEBNOVEL_BOOK_ID_INVALID = 'WEBNOVEL_BOOK_ID_INVALID',
+  NOVEL_ORIGIN_REQUIRED = 'NOVEL_ORIGIN_REQUIRED',
+  NOVEL_ORIGIN_INVALID = 'NOVEL_ORIGIN_INVALID'
 }
 
 export enum NovelStatus {
@@ -41,6 +46,11 @@ export enum Genres {
   MAGICAL_REALISM = 'MAGICAL_REALISM',
   SCI_FI = 'SCI_FI',
   XIANXIA = 'XIANXIA'
+}
+
+export enum NovelOrigin {
+  TRANSLATED = 'TRANSLATED',
+  WEBNOVEL = 'WEBNOVEL'
 }
 
 export enum Tags {
@@ -84,11 +94,6 @@ export enum Tags {
   YURI = 'YURI'
 }
 
-export interface NovelDesc {
-  tag: 'p' | 'strong';
-  text: string;
-}
-
 export interface NovelVolume {
   vid: string;
   name?: string;
@@ -100,7 +105,7 @@ export interface Novel {
   cover?: string;
   title: string;
   uid: string;
-  desc: NovelDesc[];
+  desc: EditorContent[];
   status: NovelStatus;
   genre: Genres;
   tags: Tags[];
@@ -108,6 +113,9 @@ export interface Novel {
   views: number;
   chapterCount: number;
   createdAt: Date;
+  lastUpdated?: Date;
+  webnovelBookId?: string;
+  origin: NovelOrigin;
 }
 
 export interface NovelDocument extends Novel, Document {}
@@ -160,7 +168,8 @@ const novelSchema = new Schema(
     },
     nid: {
       type: String,
-      required: NovelDBErrors.NID_REQUIRED
+      required: NovelDBErrors.NID_REQUIRED,
+      immitable: true
     },
     title: {
       type: String,
@@ -173,7 +182,8 @@ const novelSchema = new Schema(
     },
     uid: {
       type: String,
-      required: NovelDBErrors.UID_REQUIRED
+      required: NovelDBErrors.UID_REQUIRED,
+      immitable: true
     },
     desc: {
       type: [descSchema],
@@ -208,11 +218,28 @@ const novelSchema = new Schema(
     },
     views: {
       type: Number,
-      default: 0
+      default: 0,
+      min: 0
     },
     chapterCount: {
       type: Number,
-      default: 0
+      default: 0,
+      min: 0
+    },
+    lastUpdated: {
+      type: Date
+    },
+    webnovelBookId: {
+      type: String,
+      validate: [/^[0-9]{15,21}$/, NovelDBErrors.WEBNOVEL_BOOK_ID_INVALID]
+    },
+    origin: {
+      type: String,
+      required: NovelDBErrors.NOVEL_ORIGIN_REQUIRED,
+      enum: {
+        values: Object.keys(NovelOrigin),
+        message: NovelDBErrors.NOVEL_ORIGIN_INVALID
+      }
     }
   },
   {
